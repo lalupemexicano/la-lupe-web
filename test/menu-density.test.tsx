@@ -25,7 +25,7 @@ test('option dishes share the ordinary card photo and description structure, not
   const cards = desktopCards().filter(card => card.includes('class="card-variations"') && card.includes('<img'));
   assert.ok(cards.length > 5);
   for (const card of cards) {
-    assert.match(card, /class="dish-photo(?: dish-logo)?"/);
+    assert.match(card, /class="(?:dish-photo(?: dish-logo)?|menu-placeholder-icon dish-logo)"/);
     assert.match(card, /class="dish-copy"/);
     assert.doesNotMatch(card, /menu-board-summary|<table\b/);
   }

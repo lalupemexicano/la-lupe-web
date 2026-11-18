@@ -47,12 +47,13 @@ test('carousel cards show the name, COP price and a direct + button; option dish
   }
 });
 
-test('dish photos are shown except for beverages, and descriptions get a Ver más toggle', () => {
+test('dish photos or standard icons are shown, and descriptions get a Ver más toggle', () => {
   for (const category of menuCategories) {
     const beverage = category.id === 'bebidas' || category.id === 'cocteles-y-chelas';
     category.items.forEach((item, index) => {
       const card = cards(category.id)[index];
-      assert.equal(/<img\b/.test(card), !beverage, `${item.id} image`);
+      assert.match(card, /<img\b/, `${item.id} photo or icon`);
+      if (beverage) assert.match(card, /class="menu-placeholder-icon dish-logo"/, `${item.id} compact icon`);
       if (item.description) assert.match(card, /<p class="m-desc" id="[^"]+"/);
       const toggle = /<button\b[^>]*class="m-more"[^>]*aria-expanded="false"[^>]*>Ver más<\/button>/.test(card);
       assert.equal(toggle, (item.description?.length ?? 0) > 70, `${item.id}: Ver más only for long descriptions`);

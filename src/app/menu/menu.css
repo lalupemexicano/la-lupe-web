@@ -447,3 +447,9 @@ html { scrollbar-gutter: stable; }
   /* A lone card on the last row stays centered at the same width as the others. */
   .menu-catalog-compact .product-grid > :last-child:nth-child(odd) { grid-column: 1 / -1; justify-self: center; width: calc(50% - .45rem); }
 }
+
+/* Neutral illustrations replace missing photos; beverage cards retain their compact layout. */
+.menu-catalog-compact .menu-placeholder-icon.dish-logo { width: 72px; height: 54px; padding: 0; margin-bottom: .35rem; border-radius: .5rem; object-fit: contain; }
+@media (min-width: 761px) {
+  .menu-catalog-compact .product-grid > .dish-card:has(.menu-placeholder-icon) { grid-template-columns: minmax(0, 1fr); }
+}

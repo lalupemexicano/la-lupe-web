@@ -54,8 +54,17 @@ function ItemHeading({ item }: { item: MenuItem }) {
   return <h3>{item.name}{item.unit && <span className="dish-unit">{` (${item.unit})`}</span>}</h3>;
 }
 
-function DishPhoto({ src, alt, className = 'dish-photo' }: { src?: string; alt: string; className?: string }) {
-  return <Image className={`${className}${src ? '' : ' dish-logo'}`} src={src ?? '/brand/la-lupe.png'} width={960} height={720} sizes="(max-width: 700px) 50vw, (max-width: 1150px) 33vw, 25vw" alt={src ? alt : 'Logo de La Lupe · foto del plato próximamente'} />;
+const cocktailIds = new Set(['margaritas', 'margarita-rita', 'tequila-sunrise', 'cantarito-paloma', 'sex-on-the-beach', 'mimosa-durazno', 'pina-colada', 'mojito']);
+const beverageIds = new Set(menuCategories
+  .filter(category => category.id === 'bebidas' || category.id === 'cocteles-y-chelas')
+  .flatMap(category => category.items.map(item => item.id)));
+
+function DishPhoto({ src, alt, itemId, className = 'dish-photo' }: { src?: string; alt: string; itemId: string; className?: string }) {
+  const cocktail = cocktailIds.has(itemId);
+  const beverage = beverageIds.has(itemId);
+  const placeholder = cocktail ? '/icons/menu-cocktail.svg' : beverage ? '/icons/menu-drink.svg' : '/icons/menu-product.svg';
+  const placeholderAlt = cocktail ? 'Ícono de cóctel · foto no disponible' : beverage ? 'Ícono de bebida · foto no disponible' : 'Ícono de producto · foto no disponible';
+  return <Image className={`${className}${src ? '' : ' dish-logo'}`} src={src ?? placeholder} width={960} height={720} sizes="(max-width: 700px) 50vw, (max-width: 1150px) 33vw, 25vw" alt={src ? alt : placeholderAlt} />;
 }
 
 // The same product-card structure is used for simple dishes and dishes with options.
@@ -79,8 +88,9 @@ function DishCard({ item, onAdd, onOptions, showPhoto = true }: { item: MenuItem
   const price = startingPrice(item);
   return (
     <article className={`dish-card${item.image ? '' : ' dish-card-text'}${item.star ? ' is-star' : ''}`} id={`plato-${item.id}`}>
-      {showPhoto && <DishPhoto src={item.image} alt={`${item.name}, foto real de La Lupe`} />}
+      {showPhoto && <DishPhoto itemId={item.id} src={item.image} alt={`${item.name}, foto real de La Lupe`} />}
       <div className="dish-copy">
+        {!showPhoto && !item.image && <DishPhoto itemId={item.id} className="menu-placeholder-icon" alt="" />}
         {item.star && <StarBadge />}
         <ItemHeading item={item} />
         {item.description && <p className="dish-description">{item.description}</p>}
@@ -100,7 +110,7 @@ function StarCard({ item, onAdd, onOptions }: { item: MenuItem; onAdd: AddHandle
   const price = startingPrice(item);
   return (
     <article className={`star-card${item.image ? '' : ' star-card-text'}`}>
-      <DishPhoto src={item.image} alt={`${item.name}, foto real de La Lupe`} />
+      <DishPhoto itemId={item.id} src={item.image} alt={`${item.name}, foto real de La Lupe`} />
       <div className="dish-copy">
         <StarBadge />
         <ItemHeading item={item} />
@@ -144,8 +154,9 @@ function MobileCard({ item, scope, showPhoto, onAdd, onOptions }: { item: MenuIt
   const single = options ? undefined : menuProducts.find(product => product.id === productId(item, item.variants[0]))!;
   return (
     <li className={`m-card${showPhoto ? '' : ' m-card-no-photo'}${item.star ? ' is-star' : ''}`} data-item={item.id}>
-      {showPhoto && <DishPhoto className="m-photo" src={item.image} alt={`${item.name}, foto real de La Lupe`} />}
+      {showPhoto && <DishPhoto itemId={item.id} className="m-photo" src={item.image} alt={`${item.name}, foto real de La Lupe`} />}
       <div className="m-body">
+        {!showPhoto && !item.image && <DishPhoto itemId={item.id} className="menu-placeholder-icon" alt="" />}
         {item.star && <StarBadge />}
         <ItemHeading item={item} />
         {item.description && <p className="m-desc" id={descriptionId} ref={description} data-expanded={expanded}>{item.description}</p>}
@@ -188,7 +199,7 @@ function OptionsSheet({ item, showPhoto, variantId, onAdd, onClose }: { item: Me
     <>
       <button type="button" className="cart-close" aria-label="Cerrar opciones" onClick={onClose}>×</button>
       <div className="sheet-head">
-        {showPhoto && <DishPhoto className="sheet-photo" src={item.image} alt="" />}
+        {(showPhoto || !item.image) && <DishPhoto itemId={item.id} className="sheet-photo" src={item.image} alt="" />}
         <h2 id="opciones-title" tabIndex={-1}>{item.name}{item.unit && <span className="dish-unit">{` (${item.unit})`}</span>}</h2>
       </div>
       {item.picks && <fieldset className="sheet-group">
